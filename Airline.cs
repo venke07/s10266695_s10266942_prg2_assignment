@@ -1,4 +1,10 @@
-﻿using System;
+﻿//==========================================================
+// Student Number : S10266942
+// Student Name :  Pugazhenthi Dharundev
+// Partner Name : T Venkatesh
+//==========================================================
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,16 +47,9 @@ internal class Airline
         Flights = flights;
     }
 
-    public void CalculateFees() { }
-
-    public override string ToString()
-    {
-        return "Airline: " + Name + " (" + Code + ")";
-    }
-
     public bool AddFlight(Flight flight)
     {
-    
+
         if (Flights.ContainsKey(flight.FlightNumber))
         {
             return false;
@@ -66,7 +65,7 @@ internal class Airline
     {
         if (Flights.ContainsKey(flight.FlightNumber))
         {
-            Flights.Remove(flight.FlightNumber, flight);
+            Flights.Remove(flight.FlightNumber);
             return true;
         }
         else
@@ -74,5 +73,14 @@ internal class Airline
             return false;
         }
     }
+
+    public void CalculateFees() { }
+
+    public override string ToString()
+    {
+        return "Airline: " + Name + " (" + Code + ")";
+    }
+
+    
 
 }

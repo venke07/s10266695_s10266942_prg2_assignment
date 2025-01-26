@@ -1,4 +1,11 @@
-﻿using System;
+﻿//==========================================================
+// Student Number : S10266942
+// Student Name :  Pugazhenthi Dharundev
+// Partner Name : T Venkatesh
+//==========================================================
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -66,7 +73,6 @@ internal class Terminal
         }
     }
 
-    
 
     public bool AddBoardingGate(BoardingGate boardingGate)
     {

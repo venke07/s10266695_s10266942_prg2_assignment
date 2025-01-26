@@ -53,6 +53,8 @@ namespace s10266695_s10266942_prg2_assignment
             Dictionary<string, Airline> airlineDictionary = new Dictionary<string, Airline>();
             Dictionary<string, BoardingGate> boardingGateDictionary = new Dictionary<string, BoardingGate>();
 
+
+
             // Load airlines
             string airlinesFilePath = "airlines.csv";
             if (File.Exists(airlinesFilePath))
