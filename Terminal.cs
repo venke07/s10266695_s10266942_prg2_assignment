@@ -28,27 +28,27 @@ internal class Terminal
         get { return airlines; }
         set { airlines = value; }
     }
+
     private Dictionary<String, Flight> flights;
     public Dictionary<String, Flight> Flights
     {
         get { return flights; }
         set { flights = value; }
     }
+
     private Dictionary<String, BoardingGate> boardingGates;
     public Dictionary<String, BoardingGate> BoardingGates
     {
         get { return boardingGates; }
         set { boardingGates = value; }
     }
+
     private Dictionary<String, double> gateFees;
     public Dictionary<String, double> GateFees
     {
         get { return gateFees; }
         set { gateFees = value; }
     }
-
-
-    public Terminal() { }
 
     public Terminal(string terminalName, Dictionary<String, Airline> airlines, Dictionary<String, Flight> flights, Dictionary<String, BoardingGate> boardingGates, Dictionary<String, double> gateFees)
     {
@@ -61,8 +61,7 @@ internal class Terminal
 
     public bool AddAirline(Airline airline)
     {
-
-        if (airline.ContainsKey(airline.Code))
+        if (Airlines.ContainsKey(airline.Code))
         {
             return false;
         }
@@ -76,20 +75,18 @@ internal class Terminal
 
     public bool AddBoardingGate(BoardingGate boardingGate)
     {
-        if (BoardingGate.ContainsKey(boardingGate.GateName))
+        if (BoardingGates.ContainsKey(boardingGate.GateName))
         {
             return false;
         }
         else
         {
-            BoardingGate.Add(boardingGate.GateName, boardingGate);
+            BoardingGates.Add(boardingGate.GateName, boardingGate);
             return true;
         }
     }
 
-
-
-    public Airline GetAirlineFromFLight(Flight flight)
+    public Airline GetAirlineFromFlight(Flight flight)
     {
         foreach (Airline airline in Airlines.Values)
         {
@@ -98,6 +95,7 @@ internal class Terminal
                 return airline;
             }
         }
+        return null;
     }
 
     public void PrintAirlineFees() { }
@@ -106,5 +104,4 @@ internal class Terminal
     {
         return "Terminal: " + TerminalName;
     }
-
 }

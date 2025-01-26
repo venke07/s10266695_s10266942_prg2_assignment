@@ -15,7 +15,6 @@ namespace s10266695_s10266942_prg2_assignment;
 internal class Airline
 {
     private string name;
-
     public string Name
     {
         get { return name; }
@@ -23,7 +22,6 @@ internal class Airline
     }
 
     private string code;
-
     public string Code
     {
         get { return code; }
@@ -31,14 +29,11 @@ internal class Airline
     }
 
     private Dictionary<String, Flight> flights;
-
     public Dictionary<String, Flight> Flights
     {
         get { return flights; }
         set { flights = value; }
     }
-
-    public Airline() { }
 
     public Airline(string name, string code, Dictionary<String, Flight> flights)
     {
@@ -80,7 +75,5 @@ internal class Airline
     {
         return "Airline: " + Name + " (" + Code + ")";
     }
-
-    
 
 }
