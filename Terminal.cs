@@ -41,7 +41,6 @@ internal class Terminal
     }
 
 
-
     public Terminal() { }
 
     public Terminal(string terminalName, Dictionary<String, Airline> airlines, Dictionary<String, Flight> flights, Dictionary<String, BoardingGate> boardingGates, Dictionary<String, double> gateFees)
@@ -53,30 +52,51 @@ internal class Terminal
         GateFees = gateFees;
     }
 
-    public void AddAirline(Airline airline)
+    public bool AddAirline(Airline airline)
     {
-        Airlines.Add(airline.Code, airline);
+
+        if (airline.ContainsKey(airline.Code))
+        {
+            return false;
+        }
+        else
+        {
+            Airlines.Add(airline.Code, airline);
+            return true;
+        }
     }
 
-    public void AddBoardingGate(BoardingGate boardingGate)
+    
+
+    public bool AddBoardingGate(BoardingGate boardingGate)
     {
-        BoardingGates.Add(boardingGate.GateName, boardingGate);
+        if (BoardingGate.ContainsKey(boardingGate.GateName))
+        {
+            return false;
+        }
+        else
+        {
+            BoardingGate.Add(boardingGate.GateName, boardingGate);
+            return true;
+        }
     }
 
-    public void GetAirlineFromFLight(Flight flight)
+
+
+    public Airline GetAirlineFromFLight(Flight flight)
     {
         foreach (Airline airline in Airlines.Values)
         {
             if (airline.Flights.ContainsValue(flight))
             {
-                Console.WriteLine(airline);
+                return airline;
             }
         }
     }
 
     public void PrintAirlineFees()
     {
-
+        foreach(v)
     }
 
     public override string ToString()

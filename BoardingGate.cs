@@ -56,23 +56,7 @@ internal class BoardingGate
         Flight = flight;
     }
 
-    public void CalculateFees()
-    {
-        double fees = 0;
-        if (SupportsCFFT)
-        {
-            fees += 50;
-        }
-        if (SupportsDDJB)
-        {
-            fees += 100;
-        }
-        if (SupportsLWTT)
-        {
-            fees += 150;
-        }
-        Console.WriteLine("Fees for the flight is : " + fees);
-    }
+    public void CalculateFees() { }
 
     public override string ToString()
     {

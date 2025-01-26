@@ -41,24 +41,38 @@ internal class Airline
         Flights = flights;
     }
 
-    public void CalculateFees()
-    {
-
-    }
+    public void CalculateFees() { }
 
     public override string ToString()
     {
         return "Airline: " + Name + " (" + Code + ")";
     }
 
-    public void AddFlight(Flight flight)
+    public bool AddFlight(Flight flight)
     {
-        Flights.Add(flight.FlightNumber, flight);
+    
+        if (Flights.ContainsKey(flight.FlightNumber))
+        {
+            return false;
+        }
+        else
+        {
+            Flights.Add(flight.FlightNumber, flight);
+            return true;
+        }
     }
 
     public void RemoveFlight(Flight flight)
     {
-        Flights.Remove(flight.FlightNumber);
+        if (Flights.ContainsKey(flight.FlightNumber))
+        {
+            Flights.Remove(flight.FlightNumber, flight);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 }

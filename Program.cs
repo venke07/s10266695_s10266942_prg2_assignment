@@ -8,7 +8,7 @@ namespace s10266695_s10266942_prg2_assignment
     {
         static void Main(string[] args)
         {
-            // Load Flights
+            // Load flights
             string flightsFilePath = "flights.csv";
             Dictionary<string, Flight> flights = new Dictionary<string, Flight>();
 
@@ -16,7 +16,7 @@ namespace s10266695_s10266942_prg2_assignment
             {
                 string[] flightLines = File.ReadAllLines(flightsFilePath);
 
-                // Skip header and process each line
+                
                 for (int i = 1; i < flightLines.Length; i++)
                 {
                     string line = flightLines[i];
@@ -42,24 +42,24 @@ namespace s10266695_s10266942_prg2_assignment
                 Console.WriteLine($"File not found: {flightsFilePath}");
             }
 
-            // Output the loaded Flights
+            
             Console.WriteLine("\nLoaded Flights:");
             foreach (var flight in flights.Values)
             {
                 Console.WriteLine(flight);
             }
 
-            // Dictionaries to store Airline and Boarding Gate objects
+            // Create a dictionary to store airlines and boarding gates
             Dictionary<string, Airline> airlineDictionary = new Dictionary<string, Airline>();
             Dictionary<string, BoardingGate> boardingGateDictionary = new Dictionary<string, BoardingGate>();
 
-            // Load Airlines
+            // Load airlines
             string airlinesFilePath = "airlines.csv";
             if (File.Exists(airlinesFilePath))
             {
                 string[] airlineLines = File.ReadAllLines(airlinesFilePath);
 
-                // Skip header and process each line
+               
                 for (int i = 1; i < airlineLines.Length; i++)
                 {
                     string line = airlineLines[i];
@@ -85,13 +85,13 @@ namespace s10266695_s10266942_prg2_assignment
                 Console.WriteLine($"File not found: {airlinesFilePath}");
             }
 
-            // Load Boarding Gates
+            // Load boarding gates
             string boardingGatesFilePath = "boardinggates.csv";
             if (File.Exists(boardingGatesFilePath))
             {
                 string[] boardingGateLines = File.ReadAllLines(boardingGatesFilePath);
 
-                // Skip header and process each line
+                
                 for (int i = 1; i < boardingGateLines.Length; i++)
                 {
                     string line = boardingGateLines[i];
@@ -124,7 +124,7 @@ namespace s10266695_s10266942_prg2_assignment
                 Console.WriteLine($"File not found: {boardingGatesFilePath}");
             }
 
-            // Output the loaded data
+            
             Console.WriteLine("\nLoaded Airlines:");
             foreach (var airline in airlineDictionary.Values)
             {
