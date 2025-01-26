@@ -94,10 +94,7 @@ internal class Terminal
         }
     }
 
-    public void PrintAirlineFees()
-    {
-        foreach(v)
-    }
+    public void PrintAirlineFees() { }
 
     public override string ToString()
     {

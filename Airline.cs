@@ -62,7 +62,7 @@ internal class Airline
         }
     }
 
-    public void RemoveFlight(Flight flight)
+    public bool RemoveFlight(Flight flight)
     {
         if (Flights.ContainsKey(flight.FlightNumber))
         {
