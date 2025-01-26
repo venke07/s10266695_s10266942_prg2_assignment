@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Practice_Assg
+namespace s10266695_s10266942_prg2_assignment
 {
     internal class Program
     {
