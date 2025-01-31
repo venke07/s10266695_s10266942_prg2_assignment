@@ -183,7 +183,44 @@ namespace s10266695_s10266942_prg2_assignment
             }
         }
 
+        static void CreateNewFlight(Dictionary<string, Flight> flights, string filePath)
+        {
+            Console.Write("Enter Flight Number: ");
+            string? flightNumber = Console.ReadLine();
 
+            if (string.IsNullOrEmpty(flightNumber))
+            {
+                Console.WriteLine("Flight number cannot be empty.");
+                return;
+            }
+
+            Console.Write("Enter Origin: ");
+            string? origin = Console.ReadLine();
+
+            Console.Write("Enter Destination: ");
+            string? destination = Console.ReadLine();
+
+            Console.Write("Enter Expected Departure/Arrival Time (yyyy-MM-dd HH:mm): ");
+            if (DateTime.TryParse(Console.ReadLine(), out DateTime expectedTime))
+            {
+                var flight = new Flight(flightNumber, origin ?? "", destination ?? "", expectedTime, "On Time");
+                flights[flightNumber] = flight;
+                File.AppendAllText(filePath, $"\n{flightNumber},{origin},{destination},{expectedTime:yyyy-MM-dd HH:mm},On Time");
+                Console.WriteLine("Flight added successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid date/time format.");
+            }
+        }
+
+        static void DisplayScheduledFlights(Dictionary<string, Flight> flights)
+        {
+            Console.WriteLine("\n--- Scheduled Flights ---");
+            foreach (var flight in flights.Values.OrderBy(f => f.ExpectedTime))
+            {
+                Console.WriteLine(flight.ToString());
+            }
         }
     }
 }
