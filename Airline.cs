@@ -71,85 +71,15 @@ internal class Airline
 
     public double CalculateFees()
     {
-        double totalFees = 0;
-        int arrivingFlights = 0;
-        int departingFlights = 0;
-        bool hasFlightBeforeElevenOrAfterNine = false;
-        bool hasDxbBkkOrNrtFlight = false;
+        return 0;
 
-        foreach (Flight flight in flights.Values)
-        {
-            // Since we can't access private members directly, we'll need to use ToString()
-            // Assuming ToString() returns a formatted string with all flight information
-            string flightInfo = flight.ToString();
-
-            // Base fees for arriving/departing
-            if (flightInfo.Contains("Destination: SIN"))
-            {
-                totalFees += 500; // Arriving flight fee
-                arrivingFlights++;
-            }
-            if (flightInfo.Contains("Origin: SIN"))
-            {
-                totalFees += 800; // Departing flight fee
-                departingFlights++;
-            }
-
-            // Check origin for DXB, BKK, or NRT
-            if (flightInfo.Contains("Origin: DXB") ||
-                flightInfo.Contains("Origin: BKK") ||
-                flightInfo.Contains("Origin: NRT"))
-            {
-                hasDxbBkkOrNrtFlight = true;
-            }
-
-            // Parse time from the flight info string
-            // This assumes the time format is included in ToString()
-            if (flightInfo.Contains("Time:"))
-            {
-                string timeStr = flightInfo.Split("Time:")[1].Trim().Split()[0];
-                if (DateTime.TryParse(timeStr, out DateTime flightTime))
-                {
-                    if (flightTime.Hour < 11 || flightTime.Hour >= 21)
-                    {
-                        hasFlightBeforeElevenOrAfterNine = true;
-                    }
-                }
-            }
-        }
-
-        // Apply discounts
-        int totalFlights = arrivingFlights + departingFlights;
-
-        // Discount for every 5 flights
-        int fiveFlightSets = totalFlights / 5;
-        double discount = fiveFlightSets * 350;
-
-        // Time-based discount
-        if (hasFlightBeforeElevenOrAfterNine)
-        {
-            discount += 110;
-        }
-
-        // Origin-based discount
-        if (hasDxbBkkOrNrtFlight)
-        {
-            discount += 25;
-        }
-
-        // Additional discount for airlines with more than 5 flights
-        if (totalFlights > 5)
-        {
-            discount += (totalFees - discount) * 0.03; // 3% additional discount
-        }
-
-        return totalFees - discount;
     }
 
 
 
 
-public override string ToString()
+
+    public override string ToString()
     {
         return "Airline: " + Name + " (" + Code + ")";
     }

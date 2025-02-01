@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace s10266695_s10266942_prg2_assignment;
 
@@ -98,24 +99,96 @@ internal class Terminal
         return null;
     }
 
-    public void PrintAirlineFees() 
+
+    public double PrintAirlineFees()
     {
-        foreach (Airline airline in Airlines.Values)
+        double totalFees = 0;
+        double totalDiscounts = 0;
+        int arrivingFlights = 0;
+        int departingFlights = 0;
+        int flightsWithoutSpecialRequest = 0;
+
+        foreach (var flight in flights.Values)
         {
-            Console.WriteLine(airline.Name + " (" + airline.Code + ")");
-            double totalFees = 0;
-            foreach (Flight flight in airline.Flights.Values)
+            double flightFee = 0;
+
+            // Apply Boarding Gate Base Fee
+            flightFee += 300;
+
+            // Check if Origin or Destination is Singapore (SIN)
+            if (flight.origin == "SIN")
             {
-                double fees = flight.CalculateFees();
-                Console.WriteLine("  " + flight + " - $" + fees);
-                totalFees += fees;
+                flightFee += 800; // Departing flight fee
+                departingFlights++;
             }
-            Console.WriteLine("Total fees: $" + totalFees);
+            if (flight.destination == "SIN")
+            {
+                flightFee += 500; // Arriving flight fee
+                arrivingFlights++;
+            }
+
+            // Check for Special Request Code and apply respective fee
+            if (flight is CFFTFlight)
+            {
+                flightFee += 150;
+            }
+            else if (flight is DDJBFlight)
+            {
+                flightFee += 300;
+            }
+            else if (flight is LWTTFlight)
+            {
+                flightFee += 500;
+            }
+            else
+            {
+                flightsWithoutSpecialRequest++;
+            }
+
+            // Add this flight's fee to total
+            totalFees += flightFee;
         }
+
+        // Apply Promotional Discounts
+        if (arrivingFlights >= 3)
+        {
+            totalDiscounts += 350;
+        }
+        if (departingFlights >= 3)
+        {
+            totalDiscounts += 350;
+        }
+        if (flightsWithoutSpecialRequest > 0)
+        {
+            totalDiscounts += flightsWithoutSpecialRequest * 50;
+        }
+        if (flights.Count(f => f.Value.origin == "DXB" || f.Value.origin == "BKK" || f.Value.origin == "NRT") > 0)
+        {
+            totalDiscounts += 25;
+        }
+        if (flights.Count >= 5)
+        {
+            totalDiscounts += totalFees * 0.03; // 3% discount on total fees
+        }
+
+        // Final amount after discount
+        double finalTotal = totalFees - totalDiscounts;
+
+        // Display breakdown
+        Console.WriteLine($"Airline: {name} ({code})");
+        Console.WriteLine($"Subtotal Fees: ${totalFees}");
+        Console.WriteLine($"Total Discounts: ${totalDiscounts}");
+        Console.WriteLine($"Final Total Fees: ${finalTotal}");
+        Console.WriteLine("-------------------------------------------------");
+
+        return finalTotal;
     }
+
 
     public override string ToString()
     {
         return "Terminal: " + TerminalName;
     }
+
+
 }
