@@ -198,6 +198,57 @@ namespace s10266695_s10266942_prg2_assignment
                     : "None";
                 Console.WriteLine($"Flight: {flight.FlightNumber}, Origin: {flight.Origin}, Destination: {flight.Destination}, Expected: {flight.ExpectedTime:yyyy-MM-dd HH:mm}, Status: {flight.Status}, Special Request: {specialReq}, Assigned Gate: {assignedGate}");
             }
+
+
+            while (true)
+            {
+                Console.WriteLine("\nAvailable Airlines:");
+                foreach (var airline in airlineDictionary.Values)
+                {
+                    Console.WriteLine($"- {airline.Code}: {airline.Name}");
+                }
+
+                Console.Write("\nEnter a 2-Letter Airline Code (or type 'exit' to quit): ");
+                string airlineCode = Console.ReadLine()?.Trim().ToUpper();
+
+                if (airlineCode == "EXIT")
+                {
+                    break;
+                }
+
+                if (!airlineDictionary.TryGetValue(airlineCode, out Airline selectedAirline))
+                {
+                    Console.WriteLine("Invalid airline code. Please try again.");
+                    continue;
+                }
+
+                Console.WriteLine($"\nFlights for {selectedAirline.Name} ({selectedAirline.Code}):");
+                foreach (var flight in flights.Values)
+                {
+                    if (flight.AirlineCode == airlineCode)
+                    {
+                        Console.WriteLine($"- {flight.FlightNumber}: {flight.Origin} to {flight.Destination}");
+                    }
+                }
+
+                Console.Write("\nEnter a Flight Number to view details: ");
+                string flightNumber = Console.ReadLine()?.Trim();
+
+                if (!flights.TryGetValue(flightNumber, out Flight selectedFlight))
+                {
+                    Console.WriteLine("Invalid flight number. Please try again.");
+                    continue;
+                }
+
+                Console.WriteLine("\nFlight Details:");
+                Console.WriteLine($"- Flight Number: {selectedFlight.FlightNumber}");
+                Console.WriteLine($"- Airline Name: {selectedAirline.Name}");
+                Console.WriteLine($"- Origin: {selectedFlight.Origin}");
+                Console.WriteLine($"- Destination: {selectedFlight.Destination}");
+                Console.WriteLine($"- Expected Departure/Arrival Time: {selectedFlight.ExpectedTime}");
+                Console.WriteLine($"- Special Request Code: {selectedFlight.SpecialRequestCode ?? "None"}");
+                Console.WriteLine($"- Boarding Gate: {selectedFlight.BoardingGate?.GateName ?? "Not Assigned"}");
+            }
         }
 
         // List boarding gates; each gate’s ToString() shows if it has a flight assigned.
