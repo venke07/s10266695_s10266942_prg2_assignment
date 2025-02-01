@@ -98,7 +98,21 @@ internal class Terminal
         return null;
     }
 
-    public void PrintAirlineFees() { }
+    public void PrintAirlineFees() 
+    {
+        foreach (Airline airline in Airlines.Values)
+        {
+            Console.WriteLine(airline.Name + " (" + airline.Code + ")");
+            double totalFees = 0;
+            foreach (Flight flight in airline.Flights.Values)
+            {
+                double fees = flight.CalculateFees();
+                Console.WriteLine("  " + flight + " - $" + fees);
+                totalFees += fees;
+            }
+            Console.WriteLine("Total fees: $" + totalFees);
+        }
+    }
 
     public override string ToString()
     {
