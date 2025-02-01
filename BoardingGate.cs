@@ -63,7 +63,35 @@ internal class BoardingGate
         Flight = flight;
     }
 
-    public void CalculateFees() { }
+
+    // ... other properties and methods ...
+
+    public double CalculateFees()
+    {
+        double fees = 300; // Base boarding gate fee
+
+        if (flight == null)
+            return fees;
+
+        // Add fees based on special request codes
+        if (supportsDDJB && flight is DDJBFlight)
+        {
+            fees += 300; // DDJB code request fee
+        }
+
+        if (supportsCFFT && flight is CFFTFlight)
+        {
+            fees += 150; // CFFT code request fee
+        }
+
+        if (supportsLWTT && flight is LWTTFlight)
+        {
+            fees += 500; // LWTT code request fee
+        }
+
+        return fees;
+    }
+
 
     public override string ToString()
     {
