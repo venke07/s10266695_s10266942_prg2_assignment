@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace s10266695_s10266942_prg2_assignment
 {
-    internal class Flight
+     abstract class Flight
     {
         private string flightNumber;
         private string origin;
@@ -60,10 +60,8 @@ namespace s10266695_s10266942_prg2_assignment
             Status = status;
         }
 
-        public virtual double CalculateFees()
-        {
-            return 0;
-        }
+        public abstract double CalculateFees();
+           
 
         public override string ToString()
         {

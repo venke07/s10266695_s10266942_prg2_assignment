@@ -30,7 +30,7 @@ namespace s10266695_s10266942_prg2_assignment
 
         public override double CalculateFees()
         {
-            return requestFee + 150.0; // Example logic
+            return requestFee + 150.0; // Example logic 150
         }
 
         public override string ToString()
