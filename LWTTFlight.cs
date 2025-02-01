@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace s10266695_s10266942_prg2_assignment
 {
-    internal class LWTFlight : Flight
+    internal class LWTTFlight : Flight
     {
         private double requestFee;
 
@@ -22,7 +22,7 @@ namespace s10266695_s10266942_prg2_assignment
             set { requestFee = value; }
         }
 
-        public LWTFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
+        public LWTTFlight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, double requestFee)
             : base(flightNumber, origin, destination, expectedTime, status)
         {
             RequestFee = requestFee;
@@ -35,7 +35,7 @@ namespace s10266695_s10266942_prg2_assignment
 
         public override string ToString()
         {
-            return base.ToString() + $" (LWTFlight, Request Fee: {requestFee})";
+            return base.ToString() + $" (LWTTFlight, Request Fee: {requestFee})";
         }
     }
 }
