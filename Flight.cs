@@ -18,7 +18,6 @@ namespace s10266695_s10266942_prg2_assignment
         private string destination;
         private DateTime expectedTime;
         private string status;
-        private string specialRequestCode;  // Added field
 
         public string FlightNumber
         {
@@ -50,27 +49,21 @@ namespace s10266695_s10266942_prg2_assignment
             set { status = value; }
         }
 
-        public string SpecialRequestCode  // Added property
-        {
-            get { return specialRequestCode; }
-            set { specialRequestCode = value; }
-        }
 
-        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, string specialRequestCode = "")
+        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status)
         {
             FlightNumber = flightNumber;
             Origin = origin;
             Destination = destination;
             ExpectedTime = expectedTime;
             Status = status;
-            SpecialRequestCode = specialRequestCode;
         }
 
         public abstract double CalculateFees();
 
         public override string ToString()
         {
-            return $"Flight: {FlightNumber}, Origin: {Origin}, Destination: {Destination}, Expected: {ExpectedTime}, Status: {Status}, Special Request: {SpecialRequestCode}";
+            return $"Flight: {FlightNumber}, Origin: {Origin}, Destination: {Destination}, Expected: {ExpectedTime}, Status: {Status}";
         }
     }
 }

@@ -71,7 +71,7 @@ namespace s10266695_s10266942_prg2_assignment
                         ProcessUnassignedFlights(flights, boardingGates);
                         break;
                     case "9":
-                        DisplayTotalFeesPerAirline(airlines, flights, boardingGates);
+
                         break;
                     case "0":
                         return;
@@ -102,21 +102,32 @@ namespace s10266695_s10266942_prg2_assignment
                         string origin = fields[1].Trim();
                         string destination = fields[2].Trim();
                         string status = fields[4].Trim();
-                        string specialReq = fields.Length >= 6 ? fields[5].Trim() : "";
+                        string specialReq = fields.Length >= 6 ? fields[5].Trim().ToUpper() : "";
                         double requestFee = 0;
+
+                        // Validate special request code
+                        if (!string.IsNullOrEmpty(specialReq) && specialReq != "CFFT" &&
+                            specialReq != "DDJB" && specialReq != "LWTT")
+                        {
+                            Console.WriteLine($"Warning: Invalid special request code '{specialReq}' for flight {flightNumber}. Setting to NORM.");
+                            specialReq = "";
+                        }
 
                         // Create appropriate flight type based on special request
                         Flight flight;
-                        switch (specialReq.ToUpper())
+                        switch (specialReq)
                         {
                             case "CFFT":
                                 flight = new CFFTFlight(flightNumber, origin, destination, expectedTime, status, requestFee);
+                                flightSpecialRequests[flightNumber] = "CFFT";
                                 break;
                             case "DDJB":
                                 flight = new DDJBFlight(flightNumber, origin, destination, expectedTime, status, requestFee);
+                                flightSpecialRequests[flightNumber] = "DDJB";
                                 break;
                             case "LWTT":
                                 flight = new LWTTFlight(flightNumber, origin, destination, expectedTime, status, requestFee);
+                                flightSpecialRequests[flightNumber] = "LWTT";
                                 break;
                             default:
                                 flight = new NORMFlight(flightNumber, origin, destination, expectedTime, status);
@@ -206,8 +217,7 @@ namespace s10266695_s10266942_prg2_assignment
                     ? flightGateAssignments[flight.FlightNumber].GateName
                     : "None";
                 Console.WriteLine($"Flight: {flight.FlightNumber}, Origin: {flight.Origin}, Destination: {flight.Destination}, " +
-                                $"Expected: {flight.ExpectedTime:yyyy-MM-dd HH:mm}, Status: {flight.Status}, " +
-                                $"Special Request: {flight.SpecialRequestCode}, Assigned Gate: {assignedGate}");
+                                $"Expected: {flight.ExpectedTime:yyyy-MM-dd HH:mm}");
             }
 
 
@@ -667,96 +677,7 @@ namespace s10266695_s10266942_prg2_assignment
             Console.WriteLine($"Special Request: {specialReq}");
             Console.WriteLine($"Assigned Gate: {gate.GateName}");
         }
-        static void DisplayTotalFeesPerAirline(Dictionary<string, Airline> airlines, Dictionary<string, Flight> flights, Dictionary<string, BoardingGate> boardingGates)
-        {
-            // Check for unassigned flights
-            var unassignedFlights = flights.Values.Where(f =>
-                !boardingGates.Values.Any(g => g.Flight?.FlightNumber == f.FlightNumber)).ToList();
 
-            if (unassignedFlights.Any())
-            {
-                Console.WriteLine("The following flights have no assigned boarding gates. Please assign them before proceeding:");
-                foreach (var flight in unassignedFlights)
-                {
-                    Console.WriteLine(flight.FlightNumber);
-                }
-                return;
-            }
 
-            Console.WriteLine("\n--- Total Fees Per Airline ---");
-            double totalFees = 0;
-            double totalDiscounts = 0;
-
-            foreach (var airline in airlines.Values)
-            {
-                double airlineTotal = 0;
-                var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airline.Code)).ToList();
-
-                foreach (var flight in airlineFlights)
-                {
-                    // Get the assigned gate for this flight
-                    var assignedGate = boardingGates.Values.FirstOrDefault(g => g.Flight?.FlightNumber == flight.FlightNumber);
-                    if (assignedGate != null)
-                    {
-                        // Calculate fees using the gate's CalculateFees method
-                        airlineTotal += assignedGate.CalculateFees();
-                    }
-                    else
-                    {
-                        // If no gate is assigned, just use the flight's base fees
-                        airlineTotal += flight.CalculateFees();
-                    }
-                }
-
-                // Calculate promotional discounts
-                double promotionalDiscount = CalculatePromotionalDiscount(airlineFlights);
-                airlineTotal -= promotionalDiscount;
-
-                Console.WriteLine($"{airline.Name}:");
-                Console.WriteLine($"  Number of Flights: {airlineFlights.Count}");
-                Console.WriteLine($"  Original Fees: ${airlineTotal + promotionalDiscount:F2}");
-                Console.WriteLine($"  Total Discounts: ${promotionalDiscount:F2}");
-                Console.WriteLine($"  Final Fees: ${airlineTotal:F2}");
-                Console.WriteLine("  -------------------");
-
-                totalFees += airlineTotal + promotionalDiscount;
-                totalDiscounts += promotionalDiscount;
-            }
-
-            double finalTotal = totalFees - totalDiscounts;
-            double discountPercentage = totalFees > 0 ? (totalDiscounts / totalFees) * 100 : 0;
-
-            Console.WriteLine("\n=== Terminal 5 Fee Summary ===");
-            Console.WriteLine($"Total Original Fees: ${totalFees:F2}");
-            Console.WriteLine($"Total Discounts Applied: ${totalDiscounts:F2}");
-            Console.WriteLine($"Final Collected Fees: ${finalTotal:F2}");
-            Console.WriteLine($"Overall Discount Percentage: {discountPercentage:F2}%");
-        }
-
-        static double CalculatePromotionalDiscount(List<Flight> flights)
-        {
-            double discount = 0;
-
-            // Discount for every 3 flights
-            discount += (flights.Count / 3) * 350;
-
-            // Discount for flights arriving/departing before 11am or after 9pm
-            discount += flights.Count(f => f.ExpectedTime.Hour < 11 || f.ExpectedTime.Hour >= 21) * 110;
-
-            // Discount for flights with origin of DXB, BKK, or NRT
-            discount += flights.Count(f => f.Origin == "DXB" || f.Origin == "BKK" || f.Origin == "NRT") * 25;
-
-            // Discount for flights without special request codes
-            discount += flights.Count(f => string.IsNullOrEmpty(f.SpecialRequestCode)) * 50;
-
-            // Discount for airlines with more than 5 flights
-            if (flights.Count > 5)
-            {
-                double totalFees = flights.Sum(f => f.CalculateFees());
-                discount += totalFees * 0.03; // 3% off the total bill
-            }
-
-            return discount;
-        }
     }
 }
