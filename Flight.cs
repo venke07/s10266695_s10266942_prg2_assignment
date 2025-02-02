@@ -18,7 +18,6 @@ namespace s10266695_s10266942_prg2_assignment
         private string destination;
         private DateTime expectedTime;
         private string status;
-        private string specialRequestCode;  // Added field
 
         public string FlightNumber
         {
@@ -51,7 +50,7 @@ namespace s10266695_s10266942_prg2_assignment
         }
 
 
-        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status )
+        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status)
         {
             FlightNumber = flightNumber;
             Origin = origin;
@@ -64,7 +63,7 @@ namespace s10266695_s10266942_prg2_assignment
 
         public override string ToString()
         {
-            return $"Flight: {FlightNumber}, Origin: {Origin}, Destination: {Destination}, Expected: {ExpectedTime}, Status: {Status}, Special Request: {SpecialRequestCode}";
+            return $"Flight: {FlightNumber}, Origin: {Origin}, Destination: {Destination}, Expected: {ExpectedTime}, Status: {Status}";
         }
     }
 }
