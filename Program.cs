@@ -1,4 +1,11 @@
-﻿using System;
+﻿//==========================================================
+// Student Number : S10266695 , S10266942
+// Student Name :  T Venkatesh
+// Partner Name : Pugazhenthi Dharundev
+//==========================================================
+
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -99,14 +106,16 @@ namespace s10266695_s10266942_prg2_assignment
         }
 
         // --- CSV Loading Methods ---
+
         static Dictionary<string, Flight> LoadFlights(string filePath)
         {
             var flights = new Dictionary<string, Flight>();
             if (File.Exists(filePath))
             {
+                Console.WriteLine("Loading Flights...");
                 var lines = File.ReadAllLines(filePath);
-                // Assume first line is a header
-                for (int i = 1; i < lines.Length; i++)
+
+                for (int i = 1; i < lines.Length; i++) // Skip header
                 {
                     var fields = lines[i].Split(',');
                     if (fields.Length >= 5 && DateTime.TryParse(fields[3].Trim(), out DateTime expectedTime))
@@ -118,7 +127,6 @@ namespace s10266695_s10266942_prg2_assignment
                         string specialReq = fields.Length >= 6 ? fields[5].Trim().ToUpper() : "";
                         double requestFee = 0;
 
-                        // Validate special request code
                         if (!string.IsNullOrEmpty(specialReq) && specialReq != "CFFT" &&
                             specialReq != "DDJB" && specialReq != "LWTT")
                         {
@@ -126,31 +134,18 @@ namespace s10266695_s10266942_prg2_assignment
                             specialReq = "";
                         }
 
-                        // Create appropriate flight type based on special request
-                        Flight flight;
-                        switch (specialReq)
+                        Flight flight = specialReq switch
                         {
-                            case "CFFT":
-                                flight = new CFFTFlight(flightNumber, origin, destination, expectedTime, status, requestFee);
-                                flightSpecialRequests[flightNumber] = "CFFT";
-                                break;
-                            case "DDJB":
-                                flight = new DDJBFlight(flightNumber, origin, destination, expectedTime, status, requestFee);
-                                flightSpecialRequests[flightNumber] = "DDJB";
-                                break;
-                            case "LWTT":
-                                flight = new LWTTFlight(flightNumber, origin, destination, expectedTime, status, requestFee);
-                                flightSpecialRequests[flightNumber] = "LWTT";
-                                break;
-                            default:
-                                flight = new NORMFlight(flightNumber, origin, destination, expectedTime, status);
-                                break;
-                        }
+                            "CFFT" => new CFFTFlight(flightNumber, origin, destination, expectedTime, status, requestFee),
+                            "DDJB" => new DDJBFlight(flightNumber, origin, destination, expectedTime, status, requestFee),
+                            "LWTT" => new LWTTFlight(flightNumber, origin, destination, expectedTime, status, requestFee),
+                            _ => new NORMFlight(flightNumber, origin, destination, expectedTime, status),
+                        };
 
                         flights[flightNumber] = flight;
                     }
                 }
-                Console.WriteLine("Flights loaded successfully.");
+                Console.WriteLine($"{flights.Count} Flights Loaded!");
             }
             else
             {
@@ -165,20 +160,19 @@ namespace s10266695_s10266942_prg2_assignment
             var airlines = new Dictionary<string, Airline>();
             if (File.Exists(filePath))
             {
+                Console.WriteLine("Loading Airlines...");
                 var lines = File.ReadAllLines(filePath);
-                
+
                 for (int i = 1; i < lines.Length; i++)
                 {
                     var fields = lines[i].Split(',');
                     if (fields.Length >= 2)
                     {
-                       
                         Airline airline = new Airline(fields[0].Trim(), fields[1].Trim(), flights);
                         airlines[airline.Code] = airline;
-
                     }
                 }
-                Console.WriteLine("Airlines loaded successfully.");
+                Console.WriteLine($"{airlines.Count} Airlines Loaded!");
             }
             else
             {
@@ -193,8 +187,9 @@ namespace s10266695_s10266942_prg2_assignment
             var gates = new Dictionary<string, BoardingGate>();
             if (File.Exists(filePath))
             {
+                Console.WriteLine("Loading Boarding Gates...");
                 var lines = File.ReadAllLines(filePath);
-                
+
                 for (int i = 1; i < lines.Length; i++)
                 {
                     var fields = lines[i].Split(',');
@@ -207,6 +202,11 @@ namespace s10266695_s10266942_prg2_assignment
                         gates[gate.GateName] = gate;
                     }
                 }
+                Console.WriteLine($"{gates.Count} Boarding Gates Loaded!");
+            }
+            else
+            {
+                Console.WriteLine($"File not found: {filePath}");
             }
             return gates;
         }
