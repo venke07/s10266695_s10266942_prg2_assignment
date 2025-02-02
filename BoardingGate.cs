@@ -88,6 +88,6 @@ internal class BoardingGate
 
     public override string ToString()
     {
-        return "Gate Name : " + GateName + "\n" + "Supports CFFT : " + SupportsCFFT + "\n" + "Supports DDJB : " + SupportsDDJB + "\n" + "Supports LWTT : " + SupportsLWTT + "\n" + "Flight : " + Flight;
+        return "Gate Name : " + GateName + "\n" + "Supports CFFT : " + SupportsCFFT + "\n" + "Supports DDJB : " + SupportsDDJB + "\n" + "Supports LWTT : " + SupportsLWTT ;
     }
 }
