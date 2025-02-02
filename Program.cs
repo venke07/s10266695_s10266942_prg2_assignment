@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,14 @@ namespace s10266695_s10266942_prg2_assignment
             Dictionary<string, Flight> flights = LoadFlights(flightsFilePath);
             Dictionary<string, Airline> airlines = LoadAirlines(airlinesFilePath, flights);
             Dictionary<string, BoardingGate> boardingGates = LoadBoardingGates(boardingGatesFilePath);
+            Dictionary<string, double> gateFees = new Dictionary<string, double>
+                {
+                       { "CFFT", 100.0 },
+                       { "DDJB", 150.0 },
+                       { "LWTT", 200.0 },
+                       { "NORM", 50.0 }
+                };
+
 
             // Main menu loop
             while (true)
@@ -71,7 +80,7 @@ namespace s10266695_s10266942_prg2_assignment
                         ProcessUnassignedFlights(flights, boardingGates);
                         break;
                     case "9":
-                        DisplayTotalFeesPerAirline(airlines, flights, boardingGates);
+                        DisplayTotalFeesPerAirline(airlines, flights, boardingGates, gateFees);
                         break;
                     case "0":
                         return;
@@ -667,96 +676,11 @@ namespace s10266695_s10266942_prg2_assignment
             Console.WriteLine($"Special Request: {specialReq}");
             Console.WriteLine($"Assigned Gate: {gate.GateName}");
         }
-        static void DisplayTotalFeesPerAirline(Dictionary<string, Airline> airlines, Dictionary<string, Flight> flights, Dictionary<string, BoardingGate> boardingGates)
+        static void DisplayTotalFeesPerAirline(Dictionary<string, Airline> airlines, Dictionary<string, Flight> flights, Dictionary<string, BoardingGate> boardingGates, Dictionary<string, double> gateFees)
         {
-            // Check for unassigned flights
-            var unassignedFlights = flights.Values.Where(f =>
-                !boardingGates.Values.Any(g => g.Flight?.FlightNumber == f.FlightNumber)).ToList();
-
-            if (unassignedFlights.Any())
-            {
-                Console.WriteLine("The following flights have no assigned boarding gates. Please assign them before proceeding:");
-                foreach (var flight in unassignedFlights)
-                {
-                    Console.WriteLine(flight.FlightNumber);
-                }
-                return;
-            }
-
-            Console.WriteLine("\n--- Total Fees Per Airline ---");
-            double totalFees = 0;
-            double totalDiscounts = 0;
-
-            foreach (var airline in airlines.Values)
-            {
-                double airlineTotal = 0;
-                var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airline.Code)).ToList();
-
-                foreach (var flight in airlineFlights)
-                {
-                    // Get the assigned gate for this flight
-                    var assignedGate = boardingGates.Values.FirstOrDefault(g => g.Flight?.FlightNumber == flight.FlightNumber);
-                    if (assignedGate != null)
-                    {
-                        // Calculate fees using the gate's CalculateFees method
-                        airlineTotal += assignedGate.CalculateFees();
-                    }
-                    else
-                    {
-                        // If no gate is assigned, just use the flight's base fees
-                        airlineTotal += flight.CalculateFees();
-                    }
-                }
-
-                // Calculate promotional discounts
-                double promotionalDiscount = CalculatePromotionalDiscount(airlineFlights);
-                airlineTotal -= promotionalDiscount;
-
-                Console.WriteLine($"{airline.Name}:");
-                Console.WriteLine($"  Number of Flights: {airlineFlights.Count}");
-                Console.WriteLine($"  Original Fees: ${airlineTotal + promotionalDiscount:F2}");
-                Console.WriteLine($"  Total Discounts: ${promotionalDiscount:F2}");
-                Console.WriteLine($"  Final Fees: ${airlineTotal:F2}");
-                Console.WriteLine("  -------------------");
-
-                totalFees += airlineTotal + promotionalDiscount;
-                totalDiscounts += promotionalDiscount;
-            }
-
-            double finalTotal = totalFees - totalDiscounts;
-            double discountPercentage = totalFees > 0 ? (totalDiscounts / totalFees) * 100 : 0;
-
-            Console.WriteLine("\n=== Terminal 5 Fee Summary ===");
-            Console.WriteLine($"Total Original Fees: ${totalFees:F2}");
-            Console.WriteLine($"Total Discounts Applied: ${totalDiscounts:F2}");
-            Console.WriteLine($"Final Collected Fees: ${finalTotal:F2}");
-            Console.WriteLine($"Overall Discount Percentage: {discountPercentage:F2}%");
+            Terminal terminal = new Terminal("Terminal 5", airlines, flights, boardingGates, gateFees);
+            terminal.PrintAirlineFees();
         }
 
-        static double CalculatePromotionalDiscount(List<Flight> flights)
-        {
-            double discount = 0;
-
-            // Discount for every 3 flights
-            discount += (flights.Count / 3) * 350;
-
-            // Discount for flights arriving/departing before 11am or after 9pm
-            discount += flights.Count(f => f.ExpectedTime.Hour < 11 || f.ExpectedTime.Hour >= 21) * 110;
-
-            // Discount for flights with origin of DXB, BKK, or NRT
-            discount += flights.Count(f => f.Origin == "DXB" || f.Origin == "BKK" || f.Origin == "NRT") * 25;
-
-            // Discount for flights without special request codes
-            discount += flights.Count(f => string.IsNullOrEmpty(f.SpecialRequestCode)) * 50;
-
-            // Discount for airlines with more than 5 flights
-            if (flights.Count > 5)
-            {
-                double totalFees = flights.Sum(f => f.CalculateFees());
-                discount += totalFees * 0.03; // 3% off the total bill
-            }
-
-            return discount;
-        }
     }
 }
