@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,14 @@ namespace s10266695_s10266942_prg2_assignment
             Dictionary<string, Flight> flights = LoadFlights(flightsFilePath);
             Dictionary<string, Airline> airlines = LoadAirlines(airlinesFilePath, flights);
             Dictionary<string, BoardingGate> boardingGates = LoadBoardingGates(boardingGatesFilePath);
+            Dictionary<string, double> gateFees = new Dictionary<string, double>
+                {
+                       { "CFFT", 100.0 },
+                       { "DDJB", 150.0 },
+                       { "LWTT", 200.0 },
+                       { "NORM", 50.0 }
+                };
+
 
             // Main menu loop
             while (true)
@@ -40,6 +49,8 @@ namespace s10266695_s10266942_prg2_assignment
                 Console.WriteLine("7. Display Flight Schedule");
                 Console.WriteLine("8. Process Unassigned Flights");
                 Console.WriteLine("9. Display Total Fee Per Airline");
+                Console.WriteLine("10. Check Schedule Conflicts");
+                Console.WriteLine("11. Search Flights by Time Window");
                 Console.WriteLine("0. Exit");
                 Console.Write("Please select your option: ");
 
@@ -71,7 +82,13 @@ namespace s10266695_s10266942_prg2_assignment
                         ProcessUnassignedFlights(flights, boardingGates);
                         break;
                     case "9":
-
+                        DisplayTotalFeesPerAirline(airlines, flights, boardingGates, gateFees);
+                        break;
+                    case "10":
+                        DetectScheduleConflicts(flights, boardingGates, flightGateAssignments);
+                        break;
+                    case "11":
+                        SearchFlightsInTimeWindow(flights);
                         break;
                     case "0":
                         return;
@@ -188,20 +205,14 @@ namespace s10266695_s10266942_prg2_assignment
                 {
                     var fields = lines[i].Split(',');
                     if (fields.Length >= 4 &&
-                        bool.TryParse(fields[1].Trim(), out bool supportsCFFT) &&
-                        bool.TryParse(fields[2].Trim(), out bool supportsDDJB) &&
+                        bool.TryParse(fields[1].Trim(), out bool supportsDDJB) &&
+                        bool.TryParse(fields[2].Trim(), out bool supportsCFFT) &&
                         bool.TryParse(fields[3].Trim(), out bool supportsLWTT))
                     {
-                        // When loading from CSV, no flight is yet assigned so pass null.
-                        BoardingGate gate = new BoardingGate(fields[0].Trim(), supportsCFFT, supportsDDJB, supportsLWTT, null);
+                        BoardingGate gate = new BoardingGate(fields[0].Trim(), supportsDDJB, supportsCFFT, supportsLWTT, null);
                         gates[gate.GateName] = gate;
                     }
                 }
-                Console.WriteLine("Boarding gates loaded successfully.");
-            }
-            else
-            {
-                Console.WriteLine($"File not found: {filePath}");
             }
             return gates;
         }
@@ -223,14 +234,24 @@ namespace s10266695_s10266942_prg2_assignment
 
         }
         // List boarding gates; each gate’s ToString() shows if it has a flight assigned.
+        // In the ListBoardingGates method, modify the OrderBy clause to use a custom sorting
         static void ListBoardingGates(Dictionary<string, BoardingGate> gates)
         {
-            Console.WriteLine("\n--- List of Boarding Gates ---");
-            foreach (var gate in gates.Values)
+            Console.WriteLine("=".PadRight(50, '='));
+            Console.WriteLine("\nList of Boarding Gates for Changi Airport Terminal 5\n");
+            Console.WriteLine("=".PadRight(50, '='));
+            Console.WriteLine("\nGate Name  DDJB    CFFT    LWTT");
+
+            foreach (var gate in gates.Values.OrderBy(g => g.GateName[0]) // First sort by the letter
+                                           .ThenBy(g =>                    // Then sort by the number
+                                           {
+                                               string numberPart = g.GateName.Substring(1);
+                                               if (int.TryParse(numberPart, out int number))
+                                                   return number;
+                                               return 0;
+                                           }))
             {
-                // Use the BoardingGate.ToString() method.
-                Console.WriteLine(gate);
-                Console.WriteLine("---------------------");
+                Console.WriteLine($"{gate.GateName,-10} {gate.SupportsDDJB,-7} {gate.SupportsCFFT,-7} {gate.SupportsLWTT,-6}");
             }
         }
 
@@ -355,7 +376,6 @@ namespace s10266695_s10266942_prg2_assignment
             // Prompt for airline code
             Console.Write("\nEnter 2-Letter Airline Code: ");
             string? airlineCode = Console.ReadLine()?.ToUpper();
-
             if (string.IsNullOrEmpty(airlineCode) || !airlines.ContainsKey(airlineCode))
             {
                 Console.WriteLine("Invalid airline code.");
@@ -364,22 +384,25 @@ namespace s10266695_s10266942_prg2_assignment
 
             Airline selectedAirline = airlines[airlineCode];
 
-            // Display flights for the selected airline
-            Console.WriteLine($"\n--- Flights for {selectedAirline.Name} ({selectedAirline.Code}) ---");
-            var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airlineCode));
+            // Print header
+            Console.WriteLine("\nFlight Number   Airline Name         Origin             Destination       Expected Departure/Arrival Time");
 
+            // Display flights for the selected airline
+            var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airlineCode));
             if (!airlineFlights.Any())
             {
                 Console.WriteLine("No flights found for this airline.");
                 return;
             }
 
-            foreach (var flight in airlineFlights)
+            foreach (var flight in airlineFlights.OrderBy(f => f.FlightNumber))
             {
-                Console.WriteLine($"Flight Number: {flight.FlightNumber}");
-                Console.WriteLine($"Origin: {flight.Origin}");
-                Console.WriteLine($"Destination: {flight.Destination}");
-                Console.WriteLine("-------------------");
+                // Get airline code from flight number (first 2 letters)
+                string code = flight.FlightNumber.Substring(0, 2);
+                // Get airline name from airlines dictionary
+                string airlineName = airlines[code].Name;
+
+                Console.WriteLine($"{flight.FlightNumber,-15} {airlineName,-20} {flight.Origin,-18} {flight.Destination,-17} {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
             }
 
             // Prompt for flight selection
@@ -432,7 +455,6 @@ namespace s10266695_s10266942_prg2_assignment
             // Prompt for airline code
             Console.Write("\nEnter 2-Letter Airline Code: ");
             string? airlineCode = Console.ReadLine()?.ToUpper();
-
             if (string.IsNullOrEmpty(airlineCode) || !airlines.ContainsKey(airlineCode))
             {
                 Console.WriteLine("Invalid airline code.");
@@ -441,22 +463,25 @@ namespace s10266695_s10266942_prg2_assignment
 
             Airline selectedAirline = airlines[airlineCode];
 
-            // Display flights for the selected airline
-            Console.WriteLine($"\n--- Flights for {selectedAirline.Name} ({selectedAirline.Code}) ---");
-            var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airlineCode)).ToList();
+            // Print header
+            Console.WriteLine("\nFlight Number   Airline Name         Origin             Destination       Expected Departure/Arrival Time");
 
+            // Display flights for the selected airline
+            var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airlineCode));
             if (!airlineFlights.Any())
             {
                 Console.WriteLine("No flights found for this airline.");
                 return;
             }
 
-            foreach (var flight in airlineFlights)
+            foreach (var flight in airlineFlights.OrderBy(f => f.FlightNumber))
             {
-                Console.WriteLine($"\nFlight Number: {flight.FlightNumber}");
-                Console.WriteLine($"Origin: {flight.Origin}");
-                Console.WriteLine($"Destination: {flight.Destination}");
-                Console.WriteLine("-------------------");
+                // Get airline code from flight number (first 2 letters)
+                string code = flight.FlightNumber.Substring(0, 2);
+                // Get airline name from airlines dictionary
+                string airlineName = airlines[code].Name;
+
+                Console.WriteLine($"{flight.FlightNumber,-15} {airlineName,-20} {flight.Origin,-18} {flight.Destination,-17} {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
             }
 
             // Prompt for modification choice
@@ -678,6 +703,177 @@ namespace s10266695_s10266942_prg2_assignment
             Console.WriteLine($"Assigned Gate: {gate.GateName}");
         }
 
+        static void DisplayTotalFeesPerAirline(Dictionary<string, Airline> airlines, Dictionary<string, Flight> flights, Dictionary<string, BoardingGate> boardingGates, Dictionary<string, double> gateFees)
+        {
+            Terminal terminal = new Terminal("Terminal 5", airlines, flights, boardingGates, gateFees);
+            terminal.PrintAirlineFees();
+        }
+
+        // BONUS FEATURE
+        static void SearchFlightsInTimeWindow(Dictionary<string, Flight> flights)
+        {
+            Console.WriteLine("\n=== Flight Time Window Search ===\n");
+
+            // Get time window from user
+            Console.Write("Enter start time (HH:mm): ");
+            if (!DateTime.TryParse(DateTime.Now.Date.ToString("d") + " " + Console.ReadLine(), out DateTime startTime))
+            {
+                Console.WriteLine("Invalid time format. Please use HH:mm");
+                return;
+            }
+
+            Console.Write("Enter end time (HH:mm): ");
+            if (!DateTime.TryParse(DateTime.Now.Date.ToString("d") + " " + Console.ReadLine(), out DateTime endTime))
+            {
+                Console.WriteLine("Invalid time format. Please use HH:mm");
+                return;
+            }
+
+            // Find flights within the time window
+            var flightsInWindow = flights.Values
+                .Where(f => f.ExpectedTime.TimeOfDay >= startTime.TimeOfDay &&
+                           f.ExpectedTime.TimeOfDay <= endTime.TimeOfDay)
+                .OrderBy(f => f.ExpectedTime)
+                .ToList();
+
+            if (!flightsInWindow.Any())
+            {
+                Console.WriteLine($"\nNo flights found between {startTime:HH:mm} and {endTime:HH:mm}");
+                return;
+            }
+
+            // Display results
+            Console.WriteLine($"\nFound {flightsInWindow.Count} flights between {startTime:HH:mm} and {endTime:HH:mm}");
+
+            // Display flights
+            Console.WriteLine("\nFlights in time window:");
+            foreach (var flight in flightsInWindow)
+            {
+                Console.WriteLine($"Time: {flight.ExpectedTime:HH:mm} | Flight: {flight.FlightNumber} | " +
+                                $"Origin: {flight.Origin} | Destination: {flight.Destination} | ");
+            }
+        }
+
+
+
+        // BONUS FEATURE
+
+        static void DetectScheduleConflicts(Dictionary<string, Flight> flights,
+                                           Dictionary<string, BoardingGate> gates,
+                                           Dictionary<string, BoardingGate> flightGateAssignments)
+        {
+            const int MIN_BUFFER_TIME = 30;
+            Console.Clear();
+            Console.WriteLine("=== Flight Schedule Conflict Detection System ===\n");
+
+            // List to track conflicts
+            var conflicts = new List<(Flight flight1, Flight flight2, BoardingGate gate, int overlapMinutes)>();
+            int totalConflictsFound = 0;
+            int conflictsResolved = 0;
+
+            // Check each gate for potential conflicts by looking at consecutive flights
+            foreach (var gate in gates.Values)
+            {
+                var gateFlights = flights.Values
+                    .Where(f => flightGateAssignments.ContainsKey(f.FlightNumber) &&
+                                flightGateAssignments[f.FlightNumber].GateName == gate.GateName)
+                    .OrderBy(f => f.ExpectedTime)
+                    .ToList();
+
+                for (int i = 0; i < gateFlights.Count - 1; i++)
+                {
+                    var currentFlight = gateFlights[i];
+                    var nextFlight = gateFlights[i + 1];
+
+                    // Calculate the time difference between consecutive flights
+                    var timeDiff = (nextFlight.ExpectedTime - currentFlight.ExpectedTime).TotalMinutes;
+                    if (timeDiff < MIN_BUFFER_TIME)
+                    {
+                        conflicts.Add((currentFlight, nextFlight, gate, (int)(MIN_BUFFER_TIME - timeDiff)));
+                        totalConflictsFound++;
+                    }
+                }
+            }
+
+            // Process found conflicts
+            if (conflicts.Any())
+            {
+                Console.WriteLine($"Found {totalConflictsFound} scheduling conflict(s):\n");
+                foreach (var conflict in conflicts)
+                {
+                    Console.WriteLine($"Conflict at Gate {conflict.gate.GateName}:");
+                    Console.WriteLine($"  Flight {conflict.flight1.FlightNumber} at {conflict.flight1.ExpectedTime:HH:mm}");
+                    Console.WriteLine($"  Flight {conflict.flight2.FlightNumber} at {conflict.flight2.ExpectedTime:HH:mm}");
+                    Console.WriteLine($"  Buffer time needed: {conflict.overlapMinutes} minute(s)");
+                    Console.WriteLine(new string('-', 40));
+
+                    // Attempt to resolve by finding an alternative gate
+                    bool foundAlternative = false;
+                    foreach (var potentialGate in gates.Values)
+                    {
+                        // (Optional: add logic here to check for special flight requirements)
+                        if (!HasConflictWithGate(conflict.flight2, potentialGate, flights, flightGateAssignments, MIN_BUFFER_TIME))
+                        {
+                            // Reassign the flight to the alternative gate
+                            flightGateAssignments[conflict.flight2.FlightNumber] = potentialGate;
+                            potentialGate.Flight = conflict.flight2;
+                            Console.WriteLine($"Resolved: Flight {conflict.flight2.FlightNumber} reassigned to Gate {potentialGate.GateName}");
+                            conflictsResolved++;
+                            foundAlternative = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundAlternative)
+                    {
+                        Console.WriteLine($"Unable to find an alternative gate for Flight {conflict.flight2.FlightNumber}");
+                    }
+                }
+
+                DisplayConflictResolutionSummary(totalConflictsFound, conflictsResolved);
+            }
+            else
+            {
+                Console.WriteLine("No scheduling conflicts detected.");
+            }
+        }
+
+        static bool HasConflictWithGate(Flight flight, BoardingGate gate, Dictionary<string, Flight> flights,
+                                          Dictionary<string, BoardingGate> flightGateAssignments, int minBufferTime)
+        {
+            var gateFlights = flights.Values
+                .Where(f => flightGateAssignments.ContainsKey(f.FlightNumber) &&
+                            flightGateAssignments[f.FlightNumber].GateName == gate.GateName)
+                .ToList();
+
+            foreach (var existingFlight in gateFlights)
+            {
+                var timeDiff = Math.Abs((existingFlight.ExpectedTime - flight.ExpectedTime).TotalMinutes);
+                if (timeDiff < minBufferTime)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static void DisplayConflictResolutionSummary(int totalConflicts, int resolved)
+        {
+            Console.WriteLine("\n=== Conflict Resolution Summary ===");
+            Console.WriteLine($"Total conflicts detected: {totalConflicts}");
+            Console.WriteLine($"Conflicts resolved: {resolved}");
+            double resolutionRate = totalConflicts > 0 ? (resolved * 100.0 / totalConflicts) : 100;
+            Console.WriteLine($"Resolution rate: {resolutionRate:F2}%");
+
+            if (totalConflicts > resolved)
+            {
+                Console.WriteLine("\nManual intervention required for unresolved conflicts.");
+                Console.WriteLine("Suggestions:");
+                Console.WriteLine("1. Adjust flight times");
+                Console.WriteLine("2. Consider temporary gates");
+                Console.WriteLine("3. Review special requirements");
+            }
+        }
 
     }
 }
