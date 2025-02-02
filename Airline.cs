@@ -76,9 +76,6 @@ internal class Airline
     }
 
 
-
-
-
     public override string ToString()
     {
         return "Airline: " + Name + " (" + Code + ")";

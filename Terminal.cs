@@ -104,6 +104,21 @@ internal class Terminal
     {
         // Track totals across all airlines
         double totalTerminalFees = 0;
+        double totalTerminalDiscounts = 0;
+
+        // Check for unassigned flights
+        var unassignedFlights = Flights.Values.Where(f =>
+            !BoardingGates.Values.Any(g => g.Flight?.FlightNumber == f.FlightNumber));
+        if (unassignedFlights.Any())
+        {
+            Console.WriteLine("\nWarning: Some flights do not have boarding gates assigned:");
+            foreach (var flight in unassignedFlights)
+            {
+                Console.WriteLine($"- Flight {flight.FlightNumber} has no gate assigned");
+            }
+            Console.WriteLine("Please assign boarding gates to all flights before running this feature again.");
+            return 0;
+        }
 
         // Process each airline separately
         foreach (var airline in Airlines.Values)
@@ -115,7 +130,7 @@ internal class Terminal
             int flightsWithoutSpecialRequest = 0;
 
             // Get flights for this airline
-            var airlineFlights = flights.Values.Where(f => f.FlightNumber.StartsWith(airline.Code));
+            var airlineFlights = Flights.Values.Where(f => f.FlightNumber.StartsWith(airline.Code));
 
             foreach (var flight in airlineFlights)
             {
@@ -154,7 +169,6 @@ internal class Terminal
                     flightsWithoutSpecialRequest++;
                 }
 
-                // Add this flight's fee to total
                 totalFees += flightFee;
             }
 
@@ -171,13 +185,11 @@ internal class Terminal
             {
                 totalDiscounts += flightsWithoutSpecialRequest * 50;
             }
-
             var originsToCheck = new[] { "DXB", "BKK", "NRT" };
             if (airlineFlights.Any(f => originsToCheck.Contains(f.Origin)))
             {
                 totalDiscounts += 25;
             }
-
             if (airlineFlights.Count() >= 5)
             {
                 totalDiscounts += totalFees * 0.03; // 3% discount on total fees
@@ -187,16 +199,26 @@ internal class Terminal
             double finalTotal = totalFees - totalDiscounts;
 
             // Display breakdown for this airline
-            Console.WriteLine($"Airline: {airline.Name} ({airline.Code})");
+            Console.WriteLine($"\nAirline: {airline.Name} ({airline.Code})");
             Console.WriteLine($"Subtotal Fees: ${totalFees:F2}");
             Console.WriteLine($"Total Discounts: ${totalDiscounts:F2}");
             Console.WriteLine($"Final Total Fees: ${finalTotal:F2}");
             Console.WriteLine("-------------------------------------------------");
 
             totalTerminalFees += finalTotal;
+            totalTerminalDiscounts += totalDiscounts;
         }
 
-        Console.WriteLine($"\nTotal Terminal Fees: ${totalTerminalFees:F2}");
+        // Calculate and display final totals and discount percentage
+        double subtotalBeforeDiscounts = totalTerminalFees + totalTerminalDiscounts;
+        double discountPercentage = (totalTerminalDiscounts / totalTerminalFees) * 100;
+
+        Console.WriteLine($"\nTerminal 5 Fee Summary");
+        Console.WriteLine($"Subtotal of all Airline Fees: ${subtotalBeforeDiscounts:F2}");
+        Console.WriteLine($"Subtotal of all Airline Discounts: ${totalTerminalDiscounts:F2}");
+        Console.WriteLine($"Final Total Terminal Fees: ${totalTerminalFees:F2}");
+        Console.WriteLine($"Discount Percentage of Final Fees: {discountPercentage:F2}%");
+
         return totalTerminalFees;
     }
 }
