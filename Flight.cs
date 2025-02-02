@@ -3,7 +3,6 @@
 // Student Name :  T Venkatesh
 // Partner Name : Pugazhenthi Dharundev
 //==========================================================
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +11,14 @@ using System.Threading.Tasks;
 
 namespace s10266695_s10266942_prg2_assignment
 {
-    internal class Flight
+    abstract class Flight
     {
         private string flightNumber;
         private string origin;
         private string destination;
         private DateTime expectedTime;
         private string status;
+        private string specialRequestCode;  // Added field
 
         public string FlightNumber
         {
@@ -50,24 +50,27 @@ namespace s10266695_s10266942_prg2_assignment
             set { status = value; }
         }
 
-        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status)
+        public string SpecialRequestCode  // Added property
         {
+            get { return specialRequestCode; }
+            set { specialRequestCode = value; }
+        }
 
+        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status, string specialRequestCode = "")
+        {
             FlightNumber = flightNumber;
             Origin = origin;
             Destination = destination;
             ExpectedTime = expectedTime;
             Status = status;
+            SpecialRequestCode = specialRequestCode;
         }
 
-        public virtual double CalculateFees()
-        {
-            return 0;
-        }
+        public abstract double CalculateFees();
 
         public override string ToString()
         {
-            return $"Flight: {FlightNumber}, Origin: {Origin}, Destination: {Destination}, Expected: {ExpectedTime}, Status: {Status}";
+            return $"Flight: {FlightNumber}, Origin: {Origin}, Destination: {Destination}, Expected: {ExpectedTime}, Status: {Status}, Special Request: {SpecialRequestCode}";
         }
     }
 }

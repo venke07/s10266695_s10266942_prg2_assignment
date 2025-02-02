@@ -30,7 +30,19 @@ namespace s10266695_s10266942_prg2_assignment
 
         public override double CalculateFees()
         {
-            return requestFee + 150.0; // Example logic
+            double baseFee = 300; // Base boarding gate fee
+
+            // Add fees based on direction
+            if (Destination.Contains("SIN"))
+                baseFee += 500; // Arriving flight fee
+            else if (Origin.Contains("SIN"))
+                baseFee += 800; // Departing flight fee
+
+            // Add CFFT special request fee
+            baseFee += 150;
+
+            // Add request fee from constructor
+            return baseFee + RequestFee;
         }
 
         public override string ToString()
