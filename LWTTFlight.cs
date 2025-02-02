@@ -28,22 +28,21 @@ namespace s10266695_s10266942_prg2_assignment
             RequestFee = requestFee;
         }
 
-        public override double CalculateFees() // Example logic 200
+        public override double CalculateFees()
         {
-            // Base fee calculation for all flights
-            double baseFee = 300; // Boarding Gate Base Fee
+            double baseFee = 300; // Base boarding gate fee
 
-            // Add fee based on if it's arriving or departing
-            if (destination.Equals("Singapore(SIN)", StringComparison.OrdinalIgnoreCase))
-            {
-                baseFee += 500; // Arriving Flight Fee
-            }
-            else if (origin.Equals("Singapore(SIN)", StringComparison.OrdinalIgnoreCase))
-            {
-                baseFee += 800; // Departing Flight Fee
-            }
+            // Add fees based on direction
+            if (Destination.Contains("SIN"))
+                baseFee += 500; // Arriving flight fee
+            else if (Origin.Contains("SIN"))
+                baseFee += 800; // Departing flight fee
 
-            return baseFee;
+            // Add LWTT special request fee
+            baseFee += 500;
+
+            // Add request fee from constructor
+            return baseFee + RequestFee;
         }
 
 
